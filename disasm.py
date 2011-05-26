@@ -118,6 +118,7 @@ def getRegister(register):
         
 
 def disassemble(map):
+    firstword = False   # set when first non-zero is reached
     bytes = map.read(2)
     while bytes :
         indxval  = ""
@@ -129,7 +130,12 @@ def disassemble(map):
         PCoffse = ""
         word = makeWord(bytes)
         for x in bytes: readrawdata.append(x)
-
+        if not firstword :  # Still running through nulls, suppress mnemonic error
+            if word > 0 :   # first real opcode
+                firstword = True
+            else:   # still processing initial nulls
+                bytes = map.read(2)
+                continue
         if mnemonic.get(word & 0xffc0) != None :
             InstructionSet = mnemonic[word & 0xffc0]["nm"]
             ophash = mnemonic[word & 0xffc0]
